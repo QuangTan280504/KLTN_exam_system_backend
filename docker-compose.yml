@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: exam_postgres
+    environment:
+      POSTGRES_USER: exam_user
+      POSTGRES_PASSWORD: exam_pass
+      POSTGRES_DB: exam_system
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - exam-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U exam_user -d exam_system"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: exam_backend
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: exam_user
+      DB_PASSWORD: exam_pass
+      DB_NAME: exam_system
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - exam-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  exam-network:
+    driver: bridge
