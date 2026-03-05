@@ -34,6 +34,12 @@ import { ScheduleModule } from "@nestjs/schedule";
                 database: configService.get("DB_NAME", "exam_system"),
                 autoLoadEntities: true,
                 synchronize: configService.get("NODE_ENV") === "development",
+                ssl:true,
+                extra: {
+                    ssl: {
+                        rejectUnauthorized: false,
+                    },
+                }
             }),
             inject: [ConfigService],
         }),
